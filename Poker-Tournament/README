@@ -1,0 +1,48 @@
+Buica Mihai-Victoras grupa 312CB
+Tema1 - Poker Tournament
+
+Ideea de rezolvare a cerintelor se bazeaza pe stocarea salii de joc folosind doua liste:
+-o lista simplu inlantuita generica ce reprezinta mesele salii
+-o lista generica circulara cu santinela simplu inlantuita ce reprezinta jucatorii salii.
+Sala, mesele si jucatorii sunt stocati cu ajutorul structurilor din header-ul "info.h".
+Preluarea datelore:
+	Datele necesare pentru popularea listelor, se obtin din fisierele "conf" si "even", fisiere primite ca parametrii in linia de comanda, prin intermediul argv(argv[1] si argv[2]). Aceste doua fisiere se deschid pentru citire, in caz de eroare la deschidere afisandu-se un mesaj corespunzator si returnand codul de eroare -1.
+Informatiile sunt scrise in fisierul out(argv[3]) primit si el ca parametru, fiind deschis pentru scriere. In caz de eroare la deschidere se afiseaza acelasi mesaj si se intoarce -1.
+
+Alocarea salii:
+	Sala este alocata prin intermediul functiei CitireSala, ce primeste ca parametru fisierul din care trebuie sa citeasca si intoarce sala citita. Prima data este citit numarul de mese si se aloca prima celula din lista TLista masa. Pentru fiecare masa(for de la 1 la nr mese) se citeste numele(alocandu-se spatiu pentru el) si se stocheaza in masaCrt ce reprezinta un pointer la o structura de tip Masa. Atunci cand este citit numarul curent de jucatori ai mesei si numarul maxim de jucatori, se actualizeaza si campurile salii referitoare la aceste numere(sala->nrLocCrt += masaCrt->nrCrtJucatori). Pentru citirea listei de jucatori, se creeaza prima celula si se apeleaza functia CitireJucatori ce primeste ca parametri: nr crt de jucatori si fisierul din care sa citeasca, intorcand o celula cu informatii despre student. Dupa citirea datelor despre jucator, acestea sunt atribuite unei celule si sunt introduse in lista jucatorilor prin functia InsLCS-leaga jucatorul dupa santinela daca este primul, sau parcurge lista si il leaga la sarsitul listei. Dupa crearea listei de jucatori, masa este adaugata listei de mese prin functia InsLG. Ambele functii de inserare in lista intorc ca rezultat 1 pentru reusita si 0 pentru esec. Dupa ce listele sunt create, acestea se atribuie structurii sala care se si intoarce ca rezultat.
+
+Citirea comenzilor:
+	Se citeste cate un rand din fisierul even, acesta fiind despartit in cuvinte cu ajutorul strtok si cu separatorii " \n"(spatiu si new line).  In functie de primul cuvant al comenzii se citesc si urmatorii parametri.
+	Functia Noroc:
+		Daca primul cuvant citit este "noroc" se citesc alti trei parametrii stocati in: prm1 prm2 si prm3. Daca vreunul dintre primii 2 sunt introdusi gresit, atunci comanda nu are loc. Daca al treilea parametru lipseste functia se apeleaza implicit pentru valoarea 0(grad = 0). Functia noroc primeste sala, numele mesei, numele jucatorului, gradul de noroc si fisierul out si nu intoarce nimic. Aceasta functie parcurge sala cautand o masa al carui nume sa fie acelasi ca cel primit in numeMasa. Dupa ce aceasta este gasita, se cauta un jucator al carui nume sa fie ca cel din numeJucator, iar la aceste este incrementat nrMaini cu grad noroc. Daca nu se gaseste masa sau jucatorul se intorc mesaje de eroare si se iese din functie.
+	Functia Ghninion:
+		Daca primul cuvant citit este "ghinion" atunci citirea se efectueaza la fel ca mai sus, precum si parcurgerea listelor in cautarea jucatorului. Diferenta dintre cele doua functii consta in faptul ca functia ghinion intoarce un element de tip Sala pentru ca in timpul decrementarii valorii numarului de maini, jucatorii pot disparea, precum si mesele sau sala. Daca numarul de maini al unui jucator este <= 0(poate ajunge sub 0 daca primeste ghinion 2 si el avea nrMaini = 1), acesta este eliminat din lista. Eliminarea se face prin ruperea legaturilor celulei curente si refacerea legaturilor intre vecinii acesteia. Fiind o lista circulara cu santinela, daca jucatorul ce trebuie eleminat este primul, santinela este legata la a doua celula. In cazul meselor, daca unei mese ii scade numarul de jucatori sub 0, aceasta este eliminata din lista de mese. Daca numarul de mese al salii ajunge sub 0, functia returneaza NULL ceea ce inseamna ca sala este inchisa. In cazul in care jucatorul/sala nu sunt gasite, se intorc mesajele de eroare specificate.
+	Functia tura si tura_completa
+		Functia tura citeste inca un parametru ce reprezita numele mesei. Tura se realizeaza in felul urmator(dupa gasirea mesei):
+		-primul jucator din lista, este retinut intr-o variabila aux
+		-se retine santinela
+		-lista de jucatori avanseaza cu o pozitie(se ignora pozitia jucatorului curent)
+		-jucatorului curent(din aux) ii se atribuie in campul urm santinela, deoarece acesta trebuie sa devina ultimul
+		-santinela->urm devine al doilea jucator din lista initiala, prin aceasta operatie modificandu-se primul jucator de dupa santinela
+		-se parcurge lista oprindu-se pe ultimul jucator dinea
+		-ultimil jucator->urm devine aux astfel fostul prim jucator devenind ultimul realizandu-se o tura.
+		- Se scade numarul de maini al fiecarui jucator, iar printr-o functie similara cu cea descrisa in ghinion, se verifica daca vre-un jucator sau masa/sala trebuie eliminat/inchis. Singura diferenta in aceasta eliminare este ca lista de jucatori/masa este refacuta pentru a putea fi parcursa in continuare, deoarece se pot elimina mai multi jucatori la o tura, pe cand la ghinion doar unul.
+		-Functia nu intoarce nimic.
+		Functia tura completa, apeleaza pentru fiecare masa din lista functia tura(functie ce se opreste dupa gasirea mesei cautate).
+	Functia clasament:
+		Aceasta functie citeste si numele mesei, apoi parcurge jucatorii si intrduce intr-o noua lista fiecare jucator(in ordinde descrescatoare). Functia intoarce lista nou creata, ce este afisata.
+
+Pe langa functiile citite din fisierul even, se folosesc si urmatoarele functii:
+	Functiile de afisare(functii folosite de print):
+-AfiJucator = functie specializata in afisarea unui jucator(numele si nrMaini) primind un void*
+-AfiMasa = functia afiseaza numele mesei si informatiile din campul info(date despre jucator). Daca este ultimul jucator este urmat de '.' altfel de ';'.
+-Afisare = functia este una generica ce parcurge fiecare lista primita, iar cu ajutorul unei functii specializate afisaza informatia. In program este folosita doar cu rolul de a afisa masa(AfiMasa).
+	Functii de inserare:
+-InsLG = functie ce insereaza in lista generica la sfarsit. Daca lista este una goala, elementul este inserat primuil in lista, altfel daca au existat elemente precedente elementul este inserat dupa ultimul element.
+-InsLCS = functie ce insereaza in lista circulara, daca aceasta contine doar santinela atunci se insereaza dupa santinela, altfel se inseareaza la sfarsitul listei.
+-InsOrd = functie ce insereaza ordonat descrescator fiecare element primit ca parametru. Functia compara prin intermediul unei functii specializate(daca NrMaini sunt egale se compara numele, altfel se face diferenta nrMaini pentru a-l determina pe cel mai mare). Daca lista era goala, se insereaza la inceput, altfel se insereaza acolo unde functia de comparare este pozitiva(nume primit > nume curent sau nrMaini primit>nrMaini curet).
+	Functii de distrugere:
+Este parcurs fiecare element din liste, eliberate zolene ce ocupa numele, apoi eliberate celulele, iar in final eliberata sala.
+Aceste functii sunt dezactivate deoarece pe testele locale punctajul era 55 iar pe VmChecker 0. Dupa dezactivarea eliberarilor de memorie punctajul de VmChecker:55.
+Functiile au fost realizate cu ajutorul functiilor de la curs si din laboratoare.
